@@ -13,7 +13,7 @@
 using namespace std;
 
 void readInputFile(string filename, deque<IOInput*> *ioRequests, deque<IOInput*> *output);
-void printOutput(deque<IOInput*> *output);
+void printOutput(deque<IOInput*> *output, int totalTime, int trackMovement);
 
 #endif //ASSIGNMENT4_HELPER_H
 

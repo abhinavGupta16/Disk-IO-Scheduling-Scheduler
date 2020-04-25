@@ -19,6 +19,8 @@ public:
     int endTime;
     IOInput(int arrivalTime, int destTrack);
     IOInput();
+    int trackMovement;
+    int waitTime;
 };
 
 

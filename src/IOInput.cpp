@@ -14,4 +14,6 @@ IOInput::IOInput(int arrivalTime, int destTrack){
     this->destTrack = destTrack;
     this->startTime = 0;
     this->endTime = 0;
+    this->trackMovement = 0;
+    this->waitTime = 0;
 }

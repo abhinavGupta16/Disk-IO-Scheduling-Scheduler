@@ -39,8 +39,31 @@ void readInputFile(string filename, deque<IOInput*> *ioRequests, deque<IOInput*>
     }
 }
 
-void printOutput(deque<IOInput*> *ioRequests){
+void printOutput(deque<IOInput*> *ioRequests, int totalTime, int trackMovement){
+    int totalTrackMovement = 0;
+    double totalWaitTime = 0.0;
+    double totalTurnaroundTime = 0.0;
+    int maxWaitTime = 0;
+    IOInput *ioInput;
+
     for(int i = 0; i < ioRequests->size(); i++){
-        printf("%5d: %5d %5d %5d\n", i, ioRequests->at(i)->arrivalTime, ioRequests->at(i)->startTime, ioRequests->at(i)->endTime);
+        ioInput = ioRequests->at(i);
+//        totalTrackMovement += ioInput->trackMovement;
+        totalWaitTime += (ioInput->startTime - ioInput->arrivalTime);
+        totalTurnaroundTime += (ioInput->endTime - ioInput->arrivalTime);
+
+        if((ioInput->startTime - ioInput->arrivalTime) > maxWaitTime){
+            maxWaitTime = ioInput->startTime - ioInput->arrivalTime;
+        }
+
+        printf("%5d: %5d %5d %5d\n", i, ioInput->arrivalTime, ioInput->startTime, ioInput->endTime);
     }
+
+    double ans = totalWaitTime /(double) ioRequests->size();
+
+//    cout << totalWaitTime << " " << ioRequests->size() << endl;
+
+    printf("SUM: %d %d %.2lf %.2lf %d\n",
+           totalTime, trackMovement, (totalTurnaroundTime /(double) ioRequests->size()),
+           (totalWaitTime /(double) ioRequests->size()), maxWaitTime);
 }

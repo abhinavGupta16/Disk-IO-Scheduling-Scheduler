@@ -5,6 +5,8 @@
 #include "IOInput.h"
 #include "scheduler/FIFO.h"
 #include "scheduler/SSTF.h"
+#include "scheduler/LOOK.h"
+#include "scheduler/CLOOK.h"
 #include "scheduler/IOScheduler.h"
 #include <getopt.h>
 
@@ -14,6 +16,7 @@ bool verbose = false;
 IOScheduler *scheduler;
 deque<IOInput*> currentQueue;
 int track;
+int direction;
 
 void parseArguments(int argc, char *argv[]);
 
@@ -26,9 +29,11 @@ int main(int argc, char *argv[]) {
 
     readInputFile(inputFilename, &ioRequests, &outputs);
 
-    int direction = 1;
+    direction = 1;
     track = 0;
     int currentTime = 0;
+    int trackMovement = 0;
+    int prevStartTime = -1;
     IOInput *currentInput = nullptr;
 
     while(ioRequests.size() > 0 || currentQueue.size() > 0 || currentInput != nullptr){
@@ -48,23 +53,32 @@ int main(int argc, char *argv[]) {
 
         if(currentInput == nullptr){
             currentInput = scheduler->getNextInput();
-            currentInput->startTime = currentTime;
+            if(currentInput->arrivalTime == -1){
+                prevStartTime = currentTime;
+            } else if(prevStartTime != -1) {
+                currentInput->startTime = prevStartTime;
+                prevStartTime = -1;
+            } else {
+                currentInput->startTime = currentTime;
+            }
         }
 
         if(currentInput->destTrack < track){
             direction = -1;
             track--;
             currentTime++;
+            trackMovement++;
         } else if(currentInput->destTrack > track) {
             direction = 1;
             track++;
             currentTime++;
+            trackMovement++;
         } else {
             currentInput->endTime = currentTime;
             currentInput = nullptr;
         }
     }
-    printOutput(&outputs);
+    printOutput(&outputs, currentTime, trackMovement);
     return 0;
 }
 
@@ -83,6 +97,12 @@ void parseArguments(int argc, char *argv[]){
                         scheduler = new FIFO(&currentQueue);
                         break;
                     case 'j':  scheduler = new SSTF(&currentQueue, &track);
+                        break;
+                    case 's':  scheduler = new LOOK(&currentQueue, &track, &direction);
+                        break;
+                    case 'c':  scheduler = new CLOOK(&currentQueue, &track, &direction);
+                        break;
+                    case 'f':  scheduler = new CLOOK(&currentQueue, &track, &direction);
                         break;
                 }
                 break;
