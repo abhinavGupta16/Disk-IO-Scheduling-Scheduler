@@ -8,6 +8,7 @@
 #include "scheduler/LOOK.h"
 #include "scheduler/CLOOK.h"
 #include "scheduler/IOScheduler.h"
+#include "scheduler/FLOOK.h"
 #include <getopt.h>
 
 using namespace std;
@@ -15,6 +16,7 @@ using namespace std;
 bool verbose = false;
 IOScheduler *scheduler;
 deque<IOInput*> currentQueue;
+deque<IOInput*> *currentQueuePtr = &currentQueue;
 int track;
 int direction;
 
@@ -36,17 +38,17 @@ int main(int argc, char *argv[]) {
     int prevStartTime = -1;
     IOInput *currentInput = nullptr;
 
-    while(ioRequests.size() > 0 || currentQueue.size() > 0 || currentInput != nullptr){
+    while(ioRequests.size() > 0 || currentQueuePtr->size() > 0 || currentInput != nullptr || !scheduler->isActiveQueueEmpty()){
         for(int i = 0; i < ioRequests.size(); i++) {
             if (ioRequests.at(i)->arrivalTime == currentTime) {
-                currentQueue.push_back(ioRequests.at(i));
+                currentQueuePtr->push_back(ioRequests.at(i));
                 ioRequests.pop_front();
             } else {
                 break;
             }
         }
 
-        if(currentQueue.size()==0 && currentInput == nullptr){
+        if(currentQueuePtr->size()==0 && currentInput == nullptr && scheduler->isActiveQueueEmpty()){
             currentTime++;
             continue;
         }
@@ -94,15 +96,15 @@ void parseArguments(int argc, char *argv[]){
             case 's':
                 switch(optarg[0]) {
                     case 'i':
-                        scheduler = new FIFO(&currentQueue);
+                        scheduler = new FIFO(currentQueuePtr);
                         break;
-                    case 'j':  scheduler = new SSTF(&currentQueue, &track);
+                    case 'j':  scheduler = new SSTF(currentQueuePtr, &track);
                         break;
-                    case 's':  scheduler = new LOOK(&currentQueue, &track, &direction);
+                    case 's':  scheduler = new LOOK(currentQueuePtr, &track, &direction);
                         break;
-                    case 'c':  scheduler = new CLOOK(&currentQueue, &track, &direction);
+                    case 'c':  scheduler = new CLOOK(currentQueuePtr, &track, &direction);
                         break;
-                    case 'f':  scheduler = new CLOOK(&currentQueue, &track, &direction);
+                    case 'f':  scheduler = new FLOOK(&currentQueuePtr, &track, &direction);
                         break;
                 }
                 break;

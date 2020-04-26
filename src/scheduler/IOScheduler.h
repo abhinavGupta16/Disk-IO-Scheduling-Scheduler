@@ -13,6 +13,9 @@ using namespace std;
 class IOScheduler {
 public:
     virtual IOInput* getNextInput() = 0;
+    virtual bool isActiveQueueEmpty(){
+        return true;
+    };
 };
 
 
